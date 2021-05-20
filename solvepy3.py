@@ -179,7 +179,7 @@ def DPLL(assignment, cnf):
 		if len(learnedClause) == 0: # TODO: revise the condition
 			return (cnf, UNSAT)
 		cnf.add(learnedClause)
-		backTracking(assignment, learnedClause)
+		backTracking(assignment, cnf, learnedClause)
 
 		if DEBUG:
 			print("learnedClause:")
@@ -203,11 +203,11 @@ def unitPropagation(assignment, cnf):
 		assignment.setLiteralTrue(Implied(clause), literal)
 
 # TODO: move this function to appropriate place
-def backTracking(assignment, learnedClause):
+def backTracking(assignment, cnf, learnedClause):
 # update assignment
 # output: None
 	while isCompleteClause(assignment, learnedClause):
-		assignType = assignment.pop()[1]
+		assignType = assignment.pop()[1][1]
 		if type(assignType) == Implied:
 			cnf.add(assignType.clause)
 		continue

@@ -199,6 +199,7 @@ def unitPropagation(assignment, cnf):
 		(clause, literal) = getUnitElements(assignment, cnf)
 		if clause == None:
 			break
+		cnf.remove(clause)
 		assignment.setLiteralTrue(Implied(clause), literal)
 
 # TODO: move this function to appropriate place

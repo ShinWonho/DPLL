@@ -205,7 +205,7 @@ def unitPropagation(assignment, cnf):
 def backTracking(assignment, learnedClause):
 # update assignment
 # output: None
-	while (x := getFreeLiteral(assignment, learnedClause)) == None:
+	while isCompleteClause(assignment, learnedClause):
 		assignment.pop()
 		continue
 
@@ -275,7 +275,7 @@ def checkSAT(assignment, cnf):
 	complete = True
 	for clause in cnf:
 		for literal in clause:
-			if getFreeLiteral(assignment, clause) != None:
+			if not isCompleteClause(assignment, clause):
 				complete = False
 			if containBox(assignment, clause):
 				return UNSAT(clause)
@@ -298,11 +298,14 @@ def containBox(assignment, clause):
 			return False
 	return True
 
+def isCompleteClause(assignment, clause):
+	return len(set(map(lambda x : abs(x), clause)).difference(set(assignment.keys()))) == 0
+
 def getFreeLiteral(assignment, clause):
 # return a free literal in the clause
 # output: int_opt
 	for literal in clause:
-		if assignment.getLiteralValue(literal) == 0:
+		if abs(literal) not in assignment._A: #TODO
 			return literal
 	return None
 

@@ -59,7 +59,6 @@ def main():
 	(cnf, nvar, nclause) = getCNF(args.X)
 	assignment = PartialAssignment()
 	end = time.time()
-	preprocess(assignment, cnf)
 	while True:
 		print(len(assignment._A))
 		print(len(cnf))
@@ -149,16 +148,31 @@ class NotDetermined(State):
 	pass
 
 def preprocess(assignment, cnf):
-	while True:
-		(clause, literal) = getUnitElements(assignment, cnf)
-		if clause == None:
+	for index in assignment:
+		assignType = assignment.getType(index)
+		if type(assignType) == Implied:
+			deleteVar(cnf, index)
+		else:
 			break
-		assignment.setLiteralTrue(Implied(clause), literal)
-		cnf.remove(clause)
+
+def deleteVar(cnf, index):
+	for clause in cnf:
+		if index in clause:
+			cnf.remove(clause)
+			newClause = frozenset(set(clause).remove(index))
+			if len(newClause) > 0:
+				cnf.add(newClause)
+		elif -index in clause:
+			cnf.remove(clause)
+			newClause = frozenset(set(clause).remove(-index))
+			if len(newClause) > 0:
+				cnf.add(newClause)
+
 
 def DPLL(assignment, cnf):
 # assignment: PartialAssigment, cnf: set of frozenset
 # output: Boolean
+	preprocess(assignment, cnf)
 	unitPropagation(assignment, cnf)
 	state = checkSAT(assignment, cnf)
 

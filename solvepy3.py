@@ -275,21 +275,22 @@ def resolvent(c1, c2, index):
 def getUnitElements(assignment, cnf):
 # if unit clause exist, return the literal and clause
 # output: (frozenset_opt, int_opt)
-	boundVars = set(assignment.keys())
-	possibleLiterals = boundVars.union(
-			set(map(lambda x : -x, boundVars)))
 	for clause in cnf:
 		numFree = 0
 		res = None
+		trueClause = False
 		for literal in clause:
 			litV = assignment.getLiteralValue(literal)
 			if litV > 0:
-				continue
+				trueClause = True
+				break
 			elif litV == 0:
 				numFree += 1
 				res = literal
+		if trueClause:
+			continue
 		if numFree == 1:
-			return (clause, literal)
+			return (clause, res)
 	return (None, None)
 		
 def checkSAT(assignment, cnf):

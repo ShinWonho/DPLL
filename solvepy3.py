@@ -321,10 +321,13 @@ def isCompleteClause(assignment, clause):
 def getFreeLiteral(assignment, clause):
 # return a free literal in the clause
 # output: int_opt
+	result = None
 	for literal in clause:
-		if abs(literal) not in assignment._A: #TODO
-			return literal
-	return None
+		if abs(literal) not in assignment.keys(): #TODO
+			result = literal
+		elif assignment.getLiteralValue(literal) > 0:
+			return None
+	return result
 
 def decision(assignment, cnf):
 # set some free literal true

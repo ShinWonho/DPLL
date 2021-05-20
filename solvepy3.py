@@ -290,13 +290,13 @@ def getUnitElements(assignment, cnf):
 def checkSAT(assignment, cnf):
 # check the satisfiability
 # output: State
-	complete = True
+	isSAT = True
 	for clause in cnf:
-		if not isCompleteClause(assignment, clause):
-			complete = False
+		if not isTrueClause(assignment, clause):
+			isSAT = False
 		if containBox(assignment, clause):
 			return UNSAT(clause)
-	if complete:
+	if isSAT:
 		return SAT
 	else:
 		return NotDetermined

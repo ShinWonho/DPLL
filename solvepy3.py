@@ -172,8 +172,8 @@ def deleteVar(cnf, index):
 def DPLL(assignment, cnf):
 # assignment: PartialAssigment, cnf: set of frozenset
 # output: Boolean
-	preprocess(assignment, cnf)
 	unitPropagation(assignment, cnf)
+	preprocess(assignment, cnf)
 	state = checkSAT(assignment, cnf)
 
 	if DEBUG:

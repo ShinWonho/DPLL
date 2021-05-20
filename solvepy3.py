@@ -93,7 +93,7 @@ class PartialAssignment(object):
 		index = abs(literal)
 		if index in self._A:
 			return self._A[index]
-		return (index, Free(), 0)
+		return (index, Free, 0)
 	def __setitem__(self, index, typeAndValue):
 		assert(index > 0)
 		self._A[index] = (index, typeAndValue[0], typeAndValue[1])
@@ -132,7 +132,7 @@ class Decision(AssignmentType):
 	def __str__(self):
 		return "Decision"
 class Free(AssignmentType):
-	def __str(self):
+	def __str__(self):
 		return "Free"
 
 class State(object):
@@ -168,9 +168,9 @@ def DPLL(assignment, cnf):
 	if TIME:
 		start = time.time()
 
-	if type(state) == SAT:
+	if state == SAT:
 		return (cnf, SAT)
-	elif type(state) == NotDetermined:
+	elif state == NotDetermined:
 		decision(assignment, cnf)
 		return (cnf, NotDetermined)
 	elif type(state) == UNSAT:
@@ -282,9 +282,9 @@ def checkSAT(assignment, cnf):
 		if containBox(assignment, clause):
 			return UNSAT(clause)
 	if complete:
-		return SAT()
+		return SAT
 	else:
-		return NotDetermined()
+		return NotDetermined
 
 def isTrueClause(assignment, clause):
 	for literal in clause:
@@ -317,7 +317,7 @@ def decision(assignment, cnf):
 	for clause in cnf:
 		literal = getFreeLiteral(assignment, clause)
 		if literal != None:
-			assignment.setLiteralTrue(Decision(), literal)
+			assignment.setLiteralTrue(Decision, literal)
 			break
 
 	if DEBUG:

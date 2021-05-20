@@ -60,7 +60,7 @@ def main():
 	assignment = PartialAssignment()
 	end = time.time()
 	while True:
-		print(len(assignment))
+		print(len(assignment._A))
 		(cnf, state) = DPLL(assignment, cnf)
 		if state == NotDetermined:
 			continue

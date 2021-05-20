@@ -61,6 +61,8 @@ def main():
 	end = time.time()
 	while True:
 		print(len(assignment._A))
+		print(len(cnf))
+		print()
 		(cnf, state) = DPLL(assignment, cnf)
 		if state == NotDetermined:
 			continue

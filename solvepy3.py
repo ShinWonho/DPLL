@@ -323,7 +323,7 @@ def getFreeLiteral(assignment, clause):
 # output: int_opt
 	result = None
 	for literal in clause:
-		if abs(literal) not in assignment.keys(): #TODO
+		if abs(literal) not in assignment._A: #TODO
 			result = literal
 		elif assignment.getLiteralValue(literal) > 0:
 			return None

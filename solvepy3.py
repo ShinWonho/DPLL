@@ -199,6 +199,7 @@ def unitPropagation(assignment, cnf):
 		(clause, literal) = getUnitElements(assignment, cnf)
 		if clause == None:
 			break
+		cnf.remove(clause)
 		assignment.setLiteralTrue(Implied(clause), literal)
 
 # TODO: move this function to appropriate place
@@ -206,7 +207,9 @@ def backTracking(assignment, learnedClause):
 # update assignment
 # output: None
 	while isCompleteClause(assignment, learnedClause):
-		assignment.pop()
+		assignType = assignment.pop()[1]
+		if type(assignType) == Implied:
+			cnf.add(assignType.clause)
 		continue
 
 	if DEBUG:

@@ -199,7 +199,6 @@ def unitPropagation(assignment, cnf):
 		(clause, literal) = getUnitElements(assignment, cnf)
 		if clause == None:
 			break
-		cnf.remove(clause)
 		assignment.setLiteralTrue(Implied(clause), literal)
 
 # TODO: move this function to appropriate place
@@ -275,11 +274,10 @@ def checkSAT(assignment, cnf):
 # output: State
 	complete = True
 	for clause in cnf:
-		for literal in clause:
-			if not isCompleteClause(assignment, clause):
-				complete = False
-			if containBox(assignment, clause):
-				return UNSAT(clause)
+		if not isCompleteClause(assignment, clause):
+			complete = False
+		if containBox(assignment, clause):
+			return UNSAT(clause)
 	if complete:
 		return SAT()
 	else:

@@ -112,7 +112,8 @@ class PartialAssignment(object):
 		return self[literal] * literal
 	def __str__(self):
 		a = "<Partial Assignment>\n"
-		for assignInfo in self._A:
+		for index in self._A:
+			assignInfo = self._A[index]
 			a += str(assignInfo[0]) + "\t-> " + str(assignInfo[2]) +\
 					 "\t(" + str(assignInfo[1]) + ")\n"
 		return a
@@ -120,6 +121,8 @@ class PartialAssignment(object):
 		return self._A.popitem()
 	def append(self, element):
 		self._A[element[0]] = element
+	def __reversed__(self):
+		return reversed(self._A)
 	
 class AssignmentType(object):
 	pass
@@ -226,9 +229,7 @@ def clauseLearning(assignment, conflictClause):
 		print("clause learning...")
 
 	learnedClause = conflictClause
-	indices = assignment.keys()
-	indices.reverse()
-	for index in indices:
+	for index in reversed(assignment):
 		assignType = assignment.getType(index)
 		if (type(assignType) == Implied
 				and -index * assignment[index] in learnedClause):

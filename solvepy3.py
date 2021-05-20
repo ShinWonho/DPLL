@@ -59,6 +59,7 @@ def main():
 	(cnf, nvar, nclause) = getCNF(args.X)
 	assignment = PartialAssignment()
 	end = time.time()
+	preprocess(assignment, cnf)
 	while True:
 		print(len(assignment._A))
 		print(len(cnf))
@@ -143,6 +144,14 @@ class UNSAT(State):
 		self.conflictClause = conflictClause
 class NotDetermined(State):
 	pass
+
+def preprocess(assignment, cnf):
+	while True:
+		(clause, literal) = getUnitElements(assignment, cnf)
+		if clause == None:
+			break
+		assignment.setLiteralTrue(Implied(clause), literal)
+		cnf.remove(clause)
 
 def DPLL(assignment, cnf):
 # assignment: PartialAssigment, cnf: set of frozenset

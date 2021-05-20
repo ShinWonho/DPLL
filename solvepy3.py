@@ -279,11 +279,16 @@ def getUnitElements(assignment, cnf):
 	possibleLiterals = boundVars.union(
 			set(map(lambda x : -x, boundVars)))
 	for clause in cnf:
-		if isTrueClause(assignment, clause):
-			continue
-		remaingLiteral = clause.difference(possibleLiterals)
-		if len(remaingLiteral) == 1:
-			literal, *_ = remaingLiteral
+		numFree = 0
+		res = None
+		for literal in clause:
+			litV = assignment.getLiteralValue(literal)
+			if litV > 0:
+				continue
+			elif litV == 0:
+				numFree += 1
+				res = literal
+		if numFree == 1:
 			return (clause, literal)
 	return (None, None)
 		

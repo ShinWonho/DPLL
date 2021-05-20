@@ -1,5 +1,6 @@
 import argparse
 import time
+from collections import OrderedDict
 
 DEBUG = False
 TIME = False
@@ -77,33 +78,32 @@ def main():
 
 # partial assignment
 # element of PartialAssignment:
-#		(index of variable, type of assignment, value)
+#		index -> (index of variable, type of assignment, value)
 # -1 stands for false, 1 stands for true
 
 # TODO: changed data structure more elastic form
 class PartialAssignment(object):
 	def __init__(self):
-		self._A = []
+		self._A = OrderedDict()
 	def _getElement(self, literal):
 		index = abs(literal)
-		for assignInfo in self._A:
-			if assignInfo[0] == index:
-				return assignInfo
+		if index in self._A:
+			return self._A[index]
 		return (index, Free(), 0)
 	def __setitem__(self, index, typeAndValue):
 		assert(index > 0)
-		self._A.append((index, typeAndValue[0], typeAndValue[1]))
+		self._A[index] = (index, typeAndValue[0], typeAndValue[1])
 	def __getitem__(self, literal):
 		return self._getElement(literal)[2]
 	def getType(self, literal):
 		return self._getElement(literal)[1]
 	def setLiteralTrue(self, assignType, literal):
 		if literal > 0:
-			self._A.append((literal, assignType, 1))
+			self._A[literal] = (literal, assignType, 1)
 		else:
-			self._A.append((-literal, assignType, -1))
+			self._A[-literal] = (-literal, assignType, -1)
 	def keys(self):
-		return list(map(lambda x : x[0], self._A))
+		return list(self._A.keys())
 	def getLiteralValue(self, literal):
 		return self[literal] * literal
 	def __str__(self):
@@ -113,9 +113,9 @@ class PartialAssignment(object):
 					 "\t(" + str(assignInfo[1]) + ")\n"
 		return a
 	def pop(self):
-		return self._A.pop()
+		return self._A.popitem()
 	def append(self, element):
-		self._A.append(element)
+		self._A[element[0]] = element
 	
 class AssignmentType(object):
 	pass

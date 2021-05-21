@@ -57,7 +57,7 @@ def main():
 	parser.add_argument('X')
 	args = parser.parse_args()
 	(cnf, nvar, nclause) = getCNF(args.X)
-	assignment = PartialAssignment()
+	assignment = PartialAssignment(cnf)
 	end = time.time()
 	while True:
 		(cnf, state) = DPLL(assignment, cnf)
@@ -83,8 +83,9 @@ def main():
 
 # TODO: changed data structure more elastic form
 class PartialAssignment(object):
-	def __init__(self):
+	def __init__(self, cnf):
 		self._A = OrderedDict()
+        self.cnf = cnf
 	def _getElement(self, literal):
 		index = abs(literal)
 		if index in self._A:
@@ -92,7 +93,18 @@ class PartialAssignment(object):
 		return (index, Free(), 0)
 	def __setitem__(self, index, typeAndValue):
 		assert(index > 0)
-		self._A[index] = (index, typeAndValue[0], typeAndValue[1])
+        assignType = typeAndValue[0]
+        value = typeAndValue[1]
+		self._A[index] = (index, assignType, value)
+        assert(value != 0)
+        literal = index * value
+        for clause in self.cnf:
+            if literal in clause:
+                self._A.remove(clause)
+            elif -literal in clause:
+                self._A.remove(clause)
+                self._A.add(frozenset(set(clause).remove(-literal)))
+
 	def __getitem__(self, literal):
 		return self._getElement(literal)[2]
 	def getType(self, literal):
@@ -116,6 +128,12 @@ class PartialAssignment(object):
 		return self._A.popitem()
 	def append(self, element):
 		self._A[element[0]] = element
+    def update(self, cnf):
+        self.cnf = cnf
+        for clause in cnf:
+            newClause = set()
+            for literal in clause:
+                i
 	
 class AssignmentType(object):
 	pass
@@ -144,8 +162,8 @@ class NotDetermined(State):
 def DPLL(assignment, cnf):
 # assignment: PartialAssigment, cnf: set of frozenset
 # output: Boolean
-	unitPropagation(assignment, cnf)
-	state = checkSAT(assignment, cnf)
+	unitPropagation(assignment, assignment.cnf)
+	state = checkSAT(assignment, assignment.cnf)
 
 	if DEBUG:
 		while(input() != ""):
@@ -159,7 +177,7 @@ def DPLL(assignment, cnf):
 	if type(state) == SAT:
 		return (cnf, SAT)
 	elif type(state) == NotDetermined:
-		decision(assignment, cnf)
+		decision(assignment)
 		return (cnf, NotDetermined)
 	elif type(state) == UNSAT:
 		learnedClause = clauseLearning(assignment,
@@ -167,7 +185,7 @@ def DPLL(assignment, cnf):
 		if len(learnedClause) == 0: # TODO: revise the condition
 			return (cnf, UNSAT)
 		cnf.add(learnedClause)
-		backTracking(assignment, learnedClause)
+		backTracking(assignment, cnf, learnedClause)
 
 		if DEBUG:
 			print("learnedClause:")
@@ -190,12 +208,13 @@ def unitPropagation(assignment, cnf):
 		assignment.setLiteralTrue(Implied(clause), literal)
 
 # TODO: move this function to appropriate place
-def backTracking(assignment, learnedClause):
+def backTracking(assignment, cnf, learnedClause):
 # update assignment
 # output: None
 	while (x := getFreeLiteral(assignment, learnedClause)) == None:
 		assignment.pop()
 		continue
+    assignment.update(cnf)
 
 	if DEBUG:
 		print("backtracking...")

@@ -11,66 +11,62 @@ def parseClause(line):
 #				the end of the clause: "0", "\n"
 #				parse the string into set of literals
 # output: set of int
-	return frozenset(map(int,line[:-2].split()))
+    return frozenset(map(int,line[:-2].split()))
 
 def processFile(lines):
 # lines: the lines of file
 # 			 process it to CNF form
 # output: tuple(cnf, nvar, nclause)
-	i = 0
-	while (lines[i][0] == 'c'):
-		i += 1
+    i = 0
+    while (lines[i][0] == 'c'):
+        i += 1
 
-	info = lines[i].split()
-	i += 1
-	nvar = int(info[2])
-	nclause = int(info[3])
-
-	cnf = set(map(parseClause, lines[i:i+nclause]))
-
-	if DEBUG:
-		printCNF(cnf)
-
-	maxIndex = 0
-	for clause in cnf:
-		for literal in clause:
-			if abs(literal) > maxIndex: maxIndex = abs(literal)
-
-	assert(maxIndex == nvar)
-	return (cnf, nvar, nclause)
+    info = lines[i].split()
+    i += 1
+    nvar = int(info[2])
+    nclause = int(info[3])
+    
+    cnf = set(map(parseClause, lines[i:i+nclause]))
+    
+    if DEBUG:
+        printCNF(cnf)
+    
+    maxIndex = 0
+    for clause in cnf:
+        for literal in clause:
+            if abs(literal) > maxIndex: maxIndex = abs(literal)
+    
+    assert(maxIndex == nvar)
+    return (cnf, nvar, nclause)
 
 def getCNF(fname):
 # fname: file name of .cnf file
 # 			get and process the file into CNF form
 # output: tuple(cnf, nvar, nclause)
-	if DEBUG:
-		print("File: " + fname)
-		print()
-
-	f = open(fname, 'r')
-	lines = f.readlines()
-	return processFile(lines)
+    f = open(fname, 'r')
+    lines = f.readlines()
+    return processFile(lines)
 
 def main():
-	start = time.time()
-	parser = argparse.ArgumentParser()
-	parser.add_argument('X')
-	args = parser.parse_args()
-	(cnf, nvar, nclause) = getCNF(args.X)
-	assignment = PartialAssignment(cnf)
-	end = time.time()
-	while True:
-		(cnf, state) = DPLL(assignment, cnf)
-		if state == NotDetermined:
-			continue
-		elif state == SAT:
-			print("SAT")
-			break
-		elif state == UNSAT:
-			print("UNSAT")
-			break
-		else:
-		 	assert(False)
+    start = time.time()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('X')
+    args = parser.parse_args()
+    (cnf, nvar, nclause) = getCNF(args.X)
+    assignment = PartialAssignment(cnf)
+    end = time.time()
+    while True:
+        (cnf, state) = DPLL(assignment, cnf)
+        if state == NotDetermined:
+            continue
+        elif state == SAT:
+            print("SAT")
+            break
+        elif state == UNSAT:
+            print("UNSAT")
+            break
+        else:
+            assert(False)
 
 ################################################################
 
@@ -83,19 +79,19 @@ def main():
 
 # TODO: changed data structure more elastic form
 class PartialAssignment(object):
-	def __init__(self, cnf):
-		self._A = OrderedDict()
+    def __init__(self, cnf):
+        self._A = OrderedDict()
         self.cnf = cnf
-	def _getElement(self, literal):
-		index = abs(literal)
-		if index in self._A:
-			return self._A[index]
-		return (index, Free(), 0)
-	def __setitem__(self, index, typeAndValue):
-		assert(index > 0)
+    def _getElement(self, literal):
+        index = abs(literal)
+        if index in self._A:
+            return self._A[index]
+        return (index, Free(), 0)
+    def __setitem__(self, index, typeAndValue):
+        assert(index > 0)
         assignType = typeAndValue[0]
         value = typeAndValue[1]
-		self._A[index] = (index, assignType, value)
+        self._A[index] = (index, assignType, value)
         assert(value != 0)
         literal = index * value
         for clause in self.cnf:
@@ -104,36 +100,36 @@ class PartialAssignment(object):
             elif -literal in clause:
                 self._A.remove(clause)
                 self._A.add(frozenset(set(clause).remove(-literal)))
-
-	def __getitem__(self, literal):
-		return self._getElement(literal)[2]
-	def getType(self, literal):
-		return self._getElement(literal)[1]
-	def setLiteralTrue(self, assignType, literal):
-		if literal > 0:
-			self._A[literal] = (literal, assignType, 1)
-		else:
-			self._A[-literal] = (-literal, assignType, -1)
-	def keys(self):
-		return list(self._A.keys())
-	def getLiteralValue(self, literal):
-		return self[literal] * literal
-	def __str__(self):
-		a = "<Partial Assignment>\n"
-		for assignInfo in self._A:
-			a += str(assignInfo[0]) + "\t-> " + str(assignInfo[2]) +\
-					 "\t(" + str(assignInfo[1]) + ")\n"
-		return a
-	def pop(self):
-		return self._A.popitem()
-	def append(self, element):
-		self._A[element[0]] = element
+            
+    def __getitem__(self, literal):
+        return self._getElement(literal)[2]
+    def getType(self, literal):
+        return self._getElement(literal)[1]
+    def setLiteralTrue(self, assignType, literal):
+        if literal > 0:
+            self._A[literal] = (literal, assignType, 1)
+        else:
+        self._A[-literal] = (-literal, assignType, -1)
+    def keys(self):
+        return list(self._A.keys())
+    def getLiteralValue(self, literal):
+        return self[literal] * literal
+    def __str__(self):
+        a = "<Partial Assignment>\n"
+        for assignInfo in self._A:
+            a += str(assignInfo[0]) + "\t-> " + str(assignInfo[2]) +\
+                "\t(" + str(assignInfo[1]) + ")\n"
+        return a
+    def pop(self):
+        return self._A.popitem()
+    def append(self, element):
+        self._A[element[0]] = element
     def update(self, cnf):
-        self.cnf = cnf
-        for clause in cnf:
-            newClause = set()
-            for literal in clause:
-                i
+    self.cnf = cnf
+    for clause in cnf:
+        newClause = set()
+        for literal in clause:
+            i
 	
 class AssignmentType(object):
 	pass

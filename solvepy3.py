@@ -154,6 +154,8 @@ def preprocess(assignment, cnf):
 			deleteVar(cnf, index)
 		else:
 			break
+	if frozenset() in cnf:
+		cnf.remove(frozenset())
 
 def deleteVar(cnf, index):
 	for clause in cnf:
@@ -191,7 +193,7 @@ def DPLL(assignment, cnf):
 # assignment: PartialAssigment, cnf: set of frozenset
 # output: Boolean
 	unitPropagation(assignment, cnf)
-#preprocess(assignment, cnf)
+	preprocess(assignment, cnf)
 	newCNF = partialAssignedCNF(assignment, cnf)
 	state = checkSAT(assignment, newCNF)
 
@@ -235,7 +237,6 @@ def unitPropagation(assignment, cnf):
 		(clause, literal) = getUnitElements(assignment, cnf)
 		if clause == None:
 			break
-		cnf.remove(clause)
 		assignment.setLiteralTrue(Implied(clause), literal)
 
 # TODO: move this function to appropriate place
@@ -244,9 +245,6 @@ def backTracking(assignment, cnf, learnedClause):
 # output: None
 	while isCompleteClause(assignment, learnedClause):
 		assignType = assignment.pop()[1][1]
-		if type(assignType) == Implied:
-			cnf.add(assignType.clause)
-		continue
 
 	if DEBUG:
 		print("backtracking...")

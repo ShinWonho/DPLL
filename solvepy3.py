@@ -168,13 +168,32 @@ def deleteVar(cnf, index):
 			if len(newClause) > 0:
 				cnf.add(newClause)
 
+def partialAssignedCNF(assignment, cnf):
+	newCNF = set()
+	for clause in cnf:
+		newClause = set()
+		isTrue = False
+		for literal in clause:
+			litV = assignment.getLiteralValue(literal)
+			if litV > 0:
+				isTrue = True
+				break
+			elif litV < 0:
+				continue
+			else:
+				newClause.add(literal)
+		if isTrue:
+			continue
+		newCNF.add(frozenset(newClause))
+	return newCNF
 
 def DPLL(assignment, cnf):
 # assignment: PartialAssigment, cnf: set of frozenset
 # output: Boolean
 	unitPropagation(assignment, cnf)
-	preprocess(assignment, cnf)
-	state = checkSAT(assignment, cnf)
+#preprocess(assignment, cnf)
+	newCNF = partialAssignedCNF(assignment, cnf)
+	state = checkSAT(assignment, newCNF)
 
 	if DEBUG:
 		while(input() != ""):
@@ -188,11 +207,11 @@ def DPLL(assignment, cnf):
 	if state == SAT:
 		return (cnf, SAT)
 	elif state == NotDetermined:
-		decision(assignment, cnf)
+		decision(assignment, newCNF)
 		return (cnf, NotDetermined)
-	elif type(state) == UNSAT:
-		learnedClause = clauseLearning(assignment,
-				state.conflictClause)
+	elif state == UNSAT:
+		conflictClause = getConflictClause(assignment, cnf)
+		learnedClause = clauseLearning(assignment, conflictClause)
 		if len(learnedClause) == 0: # TODO: revise the condition
 			return (cnf, UNSAT)
 		cnf.add(learnedClause)
@@ -233,6 +252,13 @@ def backTracking(assignment, cnf, learnedClause):
 		print("backtracking...")
 		print(x)
 		print(assignment)
+
+def getConflictClause(assignment, cnf):
+	for clause in cnf:
+		if containBox(assignment, clause):
+			return clause
+	print(assignment)
+	assert(False)
 	
 
 def clauseLearning(assignment, conflictClause):
@@ -293,19 +319,15 @@ def getUnitElements(assignment, cnf):
 			return (clause, res)
 	return (None, None)
 		
-def checkSAT(assignment, cnf):
+def checkSAT(assignment, partialCNF):
 # check the satisfiability
 # output: State
-	isSAT = True
-	for clause in cnf:
-		if not isTrueClause(assignment, clause):
-			isSAT = False
-		if containBox(assignment, clause):
-			return UNSAT(clause)
-	if isSAT:
+	if frozenset() in partialCNF:
+		return UNSAT
+	elif len(partialCNF) == 0:
 		return SAT
-	else:
-		return NotDetermined
+	else: return NotDetermined
+
 
 def isTrueClause(assignment, clause):
 	for literal in clause:
@@ -335,14 +357,12 @@ def getFreeLiteral(assignment, clause):
 			return None
 	return result
 
-def decision(assignment, cnf):
+def decision(assignment, newCNF):
 # set some free literal true
 # output: None
-	for clause in cnf:
-		literal = getFreeLiteral(assignment, clause)
-		if literal != None:
-			assignment.setLiteralTrue(Decision, literal)
-			break
+	anyClause, *_ = newCNF
+	anyLiteral, *_ = anyClause
+	assignment.setLiteralTrue(Decision, anyLiteral)
 
 	if DEBUG:
 		print("decision...")

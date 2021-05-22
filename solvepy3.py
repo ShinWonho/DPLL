@@ -60,9 +60,6 @@ def main():
 	assignment = PartialAssignment()
 	end = time.time()
 	while True:
-		print(len(assignment._A))
-		print(len(cnf))
-		print()
 		(cnf, state) = DPLL(assignment, cnf)
 		if state == NotDetermined:
 			continue
@@ -142,8 +139,7 @@ class State(object):
 class SAT(State):
 	pass
 class UNSAT(State):
-	def __init__(self, conflictClause):
-		self.conflictClause = conflictClause
+	pass
 class NotDetermined(State):
 	pass
 
@@ -244,11 +240,10 @@ def backTracking(assignment, cnf, learnedClause):
 # update assignment
 # output: None
 	while isCompleteClause(assignment, learnedClause):
-		assignType = assignment.pop()[1][1]
+		assignType = assignment.pop()
 
 	if DEBUG:
 		print("backtracking...")
-		print(x)
 		print(assignment)
 
 def getConflictClause(assignment, cnf):
@@ -364,7 +359,7 @@ def decision(assignment, newCNF):
 
 	if DEBUG:
 		print("decision...")
-		print(literal)
+		print(anyLiteral)
 		print()
 
 ################################################################

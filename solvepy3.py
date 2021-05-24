@@ -64,8 +64,13 @@ def main():
 		if state == NotDetermined:
 			continue
 		elif state == SAT:
-			print("s SATISTFIABLE")
-# TODO: print assignemnt
+			satisfyingAssignment = "v "
+			for index in assignment._A: # TODO: replace assignment._A
+				print(str(index))
+				satisfyingAssignment += " " +\
+						str(assignment.getLiteralValue(index))
+			print("s SATISTFIABLE" + satisfyingAssignment)
+
 			break
 		elif state == UNSAT:
 			print("s UNSATISFIABLE")

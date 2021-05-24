@@ -66,7 +66,6 @@ def main():
 		elif state == SAT:
 			satisfyingAssignment = "v "
 			for index in assignment._A: # TODO: replace assignment._A
-				print(str(index))
 				satisfyingAssignment += " " +\
 						str(assignment.getLiteralValue(index))
 			print("s SATISTFIABLE" + satisfyingAssignment)
@@ -255,15 +254,45 @@ def checkSAT(assignment, assignedCNF):
 	else: return NotDetermined
 
 def decision(assignment, cnf):
-# set some free literal true
+# set the variable that occurs most often
 # output: None
-	anyClause, *_ = cnf
-	anyLiteral, *_ = anyClause
-	assignment.setLiteralTrue(Decision, anyLiteral)
+	counter = OrderedDict()
+	for clause in cnf:
+		for literal in clause:
+			index = abs(literal)
+			if index in counter:
+				tup = counter[index]
+				if literal > 0:
+					counter[index] = (tup[0] + 1, tup[1])
+				else:
+					counter[index] = (tup[0], tup[1] + 1)
+			else:
+				if literal > 0:
+					counter[index] = (1, 0)
+				else:
+					counter[index] = (0, 1)
+	maxIndex = 0
+	maxCount = 0
+	for index in counter:
+		tup = counter[index]
+		count = tup[0] + tup[1]
+		if count > maxCount:
+			maxIndex = index
+			maxCount = count
+	
+	tup = counter[maxIndex]
+	if tup[0] >= tup[1]:
+		assignment[maxIndex] = (Decision, 1)
+	else:
+		assignment[maxIndex] = (Decision, -1)
+
+
+# anyClause, *_ = cnf
+#	anyLiteral, *_ = anyClause
 
 	if DEBUG:
 		print("decision...")
-		print(anyLiteral)
+		print(maxIndex)
 		print()
 
 def getConflictClause(assignment, cnf):
